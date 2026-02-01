@@ -378,31 +378,28 @@ void print_syscall(struct user_regs_struct *regs) {
 
     switch (argc) {
     case 1:
-        fprintf(stderr, "%s(%lli) = %lli\n", name, regs->rdi, regs->rax);
+        fprintf(stderr, "%s(%lli)", name, regs->rdi);
         break;
     case 2:
-        fprintf(stderr, "%s(%lli, %lli) = %lli\n", name, regs->rdi, regs->rsi,
-                regs->rax);
+        fprintf(stderr, "%s(%lli, %lli)", name, regs->rdi, regs->rsi);
         break;
     case 3:
-        fprintf(stderr, "%s(%lli, %lli, %lli) = %lli\n", name, regs->rdi,
-                regs->rsi, regs->rdx, regs->rax);
+        fprintf(stderr, "%s(%lli, %lli, %lli)", name, regs->rdi, regs->rsi,
+                regs->rdx);
         break;
     case 4:
-        fprintf(stderr, "%s(%lli, %lli, %lli, %lli) = %lli\n", name, regs->rdi,
-                regs->rsi, regs->rdx, regs->r10, regs->rax);
+        fprintf(stderr, "%s(%lli, %lli, %lli, %lli)", name, regs->rdi,
+                regs->rsi, regs->rdx, regs->r10);
         break;
     case 5:
-        fprintf(stderr, "%s(%lli, %lli, %lli, %lli, %lli) = %lli\n", name,
-                regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8,
-                regs->rax);
+        fprintf(stderr, "%s(%lli, %lli, %lli, %lli, %lli)", name, regs->rdi,
+                regs->rsi, regs->rdx, regs->r10, regs->r8);
         break;
     case 6:
-        fprintf(stderr, "%s(%lli, %lli, %lli, %lli, %lli, %lli) = %lli\n", name,
-                regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9,
-                regs->rax);
+        fprintf(stderr, "%s(%lli, %lli, %lli, %lli, %lli, %lli)", name,
+                regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9);
         break;
     default:
-        fprintf(stderr, "%s(?) = %lli\n", name, regs->rax);
+        fprintf(stderr, "%s(?)", name);
     }
 }

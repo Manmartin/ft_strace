@@ -33,8 +33,9 @@ int main(int argc, char **argv, char **env) {
     }
     check(ptrace(PTRACE_SEIZE, pid, NULL, PTRACE_O_TRACESYSGOOD),
           "PTRACE_SEIZE");
-
     int wstatus;
+    waitpid(pid, &wstatus, 0);
+
     bool in_syscall = false;
     while (1) {
         check(ptrace(PTRACE_SYSCALL, pid, NULL, NULL), "PTRACE_SYSCALL");
@@ -51,19 +52,19 @@ int main(int argc, char **argv, char **env) {
         }
 
         if (WIFSTOPPED(wstatus) && (wstatus >> 8) == (SIGTRAP | 0x80)) {
-            if (!in_syscall) {
-                in_syscall = true;
-                continue;
-            }
-            in_syscall = false;
-
             struct user_regs_struct regs;
             struct iovec iov;
             iov.iov_base = &regs;
             iov.iov_len  = sizeof(regs);
+
             check(ptrace(PTRACE_GETREGSET, pid, NT_PRSTATUS, &iov),
                   "PTRACE_GETREGSET");
-            print_syscall(&regs);
+            if (!in_syscall) {
+                print_syscall(&regs);
+            } else {
+                fprintf(stderr, " = %lli\n", regs.rax);
+            }
+            in_syscall = !in_syscall;
         }
     }
     return EXIT_SUCCESS;
