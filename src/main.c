@@ -31,6 +31,8 @@ int main(int argc, char **argv, char **env) {
         perror("execve");
         exit(EXIT_FAILURE);
     }
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
     check(ptrace(PTRACE_SEIZE, pid, NULL, PTRACE_O_TRACESYSGOOD),
           "PTRACE_SEIZE");
     int wstatus;
