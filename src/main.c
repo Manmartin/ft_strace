@@ -19,7 +19,9 @@
     }
 
 int main(int argc, char **argv, char **env) {
-    (void)argc;
+    args_t args;
+    verify_args(&args, argc, argv, env);
+
     pid_t pid = fork();
     if (pid < 0) {
         perror("fork");
@@ -27,23 +29,27 @@ int main(int argc, char **argv, char **env) {
     }
     if (pid == 0) {
         kill(getpid(), SIGSTOP);
-        execve(argv[1], &(argv[1]), env);
+        execve(args.program_path, args.args, args.env);
         perror("execve");
         exit(EXIT_FAILURE);
     }
     close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    check(ptrace(PTRACE_SEIZE, pid, NULL, PTRACE_O_TRACESYSGOOD),
+    // close(STDOUT_FILENO);
+    check(ptrace(PTRACE_SEIZE, pid, NULL, PTRACE_O_TRACESYSGOOD,
+                 PTRACE_O_EXITKILL),
           "PTRACE_SEIZE");
     int wstatus;
     waitpid(pid, &wstatus, 0);
 
     bool in_syscall = false;
-    while (1) {
+    while (!WIFEXITED(wstatus)) {
         check(ptrace(PTRACE_SYSCALL, pid, NULL, NULL), "PTRACE_SYSCALL");
         waitpid(pid, &wstatus, 0);
 
         if (WIFEXITED(wstatus)) {
+            if (in_syscall) {
+                fprintf(stderr, " = ?\n");
+            }
             fprintf(stderr, "+++ exited with %i +++\n", WEXITSTATUS(wstatus));
             break;
         }
