@@ -12,7 +12,10 @@ BUILD_DIR := build
 SRC_DIR := src
 INC_DIR := includes
 
-SRCS := src/main.c src/syscall.c src/args.c
+SRCS :=	src/args.c 		\
+    	src/main.c 		\
+     	src/syscall.c 	\
+      	src/tracer.c
 OBJS := $(SRCS:%.c=$(BUILD_DIR)/%.o)
 
 CFLAGS += -I./$(INC_DIR)
