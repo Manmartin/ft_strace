@@ -4,7 +4,7 @@ MKDIR = mkdir -p
 RM = rm -rf
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -std=gnu11
 
 LDFLAGS =
 
@@ -32,10 +32,8 @@ $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
-
 clean:
 	$(RM) $(OBJS)
-
 fclean: clean
 	$(RM) $(BUILD_DIR)
 
