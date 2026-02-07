@@ -1,8 +1,10 @@
+#define _GNU_SOURCE
 #include <linux/elf.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/ptrace.h>
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -12,7 +14,11 @@
 #include "ft_strace.h"
 
 static void signal_exit(int status) {
-    fprintf(stderr, "+++ killed by %i +++\n", WTERMSIG(status));
+    if (WCOREDUMP(status))
+        fprintf(stderr, "Quit (core dumped)\n");
+    else
+        fprintf(stderr, "+++ killed by SIG%s +++\n",
+                sigabbrev_np(WTERMSIG(status)));
     exit(status | 0x80);
 }
 

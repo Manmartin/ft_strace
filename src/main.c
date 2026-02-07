@@ -24,6 +24,11 @@ int main(int argc, char **argv, char **env) {
     close(STDIN_FILENO);
     // close(STDOUT_FILENO);
 
-    signal(SIGINT, SIG_IGN);
+    struct sigaction act = {};
+
+    act.sa_handler = SIG_IGN;
+    sigaction(SIGINT, &act, NULL);
+    sigaction(SIGQUIT, &act, NULL);
+    sigaction(SIGTSTP, &act, NULL);
     return trace_loop(pid);
 }
