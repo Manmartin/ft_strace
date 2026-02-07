@@ -189,7 +189,7 @@ syscall_t syscall_table64[] = {
     [192] = {"lgetxattr", 4},
     [193] = {"fgetxattr", 4},
     [194] = {"listxattr", 3},
-    [195] = {"llistxattr", 3},
+    [195] = {"listxattr", 3},
     [196] = {"flistxattr", 3},
     [197] = {"removexattr", 2},
     [198] = {"lremovexattr", 2},
@@ -582,7 +582,7 @@ syscall_t syscall_table32[] = {
     [230] = {"lgetxattr", 4},
     [231] = {"fgetxattr", 4},
     [232] = {"listxattr", 3},
-    [233] = {"llistxattr", 3},
+    [233] = {"listxattr", 3},
     [234] = {"flistxattr", 3},
     [235] = {"removexattr", 2},
     [236] = {"lremovexattr", 2},
@@ -810,36 +810,36 @@ syscall_t syscall_table32[] = {
     [469] = {"file_setattr", 5},
 };
 
-void print_syscall64(struct user_regs_struct *regs) {
-    uint64_t syscall_number = regs->orig_rax;
-    uint32_t argc           = syscall_table64[syscall_number].argc;
-    const char *name        = syscall_table64[syscall_number].name;
+void print_syscall64(struct user_regs_struct64 *regs) {
+    uint64_t    syscall_number = regs->orig_rax;
+    uint32_t    argc           = syscall_table64[syscall_number].argc;
+    const char *name           = syscall_table64[syscall_number].name;
 
     switch (argc) {
     case 0:
         fprintf(stderr, "%s()", name);
         break;
     case 1:
-        fprintf(stderr, "%s(%lli)", name, regs->rdi);
+        fprintf(stderr, "%s(%li)", name, regs->rdi);
         break;
     case 2:
-        fprintf(stderr, "%s(%lli, %lli)", name, regs->rdi, regs->rsi);
+        fprintf(stderr, "%s(%li, %li)", name, regs->rdi, regs->rsi);
         break;
     case 3:
-        fprintf(stderr, "%s(%lli, %lli, %lli)", name, regs->rdi, regs->rsi,
+        fprintf(stderr, "%s(%li, %li, %li)", name, regs->rdi, regs->rsi,
                 regs->rdx);
         break;
     case 4:
-        fprintf(stderr, "%s(%lli, %lli, %lli, %lli)", name, regs->rdi,
-                regs->rsi, regs->rdx, regs->r10);
+        fprintf(stderr, "%s(%li, %li, %li, %li)", name, regs->rdi, regs->rsi,
+                regs->rdx, regs->r10);
         break;
     case 5:
-        fprintf(stderr, "%s(%lli, %lli, %lli, %lli, %lli)", name, regs->rdi,
+        fprintf(stderr, "%s(%li, %li, %li, %li, %li)", name, regs->rdi,
                 regs->rsi, regs->rdx, regs->r10, regs->r8);
         break;
     case 6:
-        fprintf(stderr, "%s(%lli, %lli, %lli, %lli, %lli, %lli)", name,
-                regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9);
+        fprintf(stderr, "%s(%li, %li, %li, %li, %li, %li)", name, regs->rdi,
+                regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9);
         break;
     default:
         fprintf(stderr, "%s(?)", name);
@@ -847,9 +847,9 @@ void print_syscall64(struct user_regs_struct *regs) {
 }
 
 void print_syscall32(struct user_regs_struct32 *regs) {
-    uint32_t syscall_number = regs->orig_eax;
-    uint32_t argc           = syscall_table32[syscall_number].argc;
-    const char *name        = syscall_table32[syscall_number].name;
+    uint32_t    syscall_number = regs->orig_eax;
+    uint32_t    argc           = syscall_table32[syscall_number].argc;
+    const char *name           = syscall_table32[syscall_number].name;
 
     switch (argc) {
     case 0:

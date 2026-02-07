@@ -17,7 +17,8 @@ int main(int argc, char **argv, char **env) {
     if (pid == 0) {
         kill(getpid(), SIGSTOP);
         execve(args.program_path, args.args, args.env);
-        perror("execve");
+        perror("ft_strace: execve");
+        fprintf(stderr, "+++ exited with %i +++\n", EXIT_FAILURE);
         exit(EXIT_FAILURE);
     }
     close(STDIN_FILENO);
