@@ -78,6 +78,10 @@ struct user_regs_struct32 {
 /* args.c */
 void verify_args(args_t *args, int argc, char **argv, char **env);
 
+/* signals.c */
+void signal_exit(int status);
+void print_signal(siginfo_t signal);
+
 /* syscall.c */
 void print_syscall64(struct user_regs_struct64 *regs);
 void print_syscall32(struct user_regs_struct32 *regs);

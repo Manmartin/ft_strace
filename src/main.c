@@ -1,6 +1,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "ft_strace.h"
@@ -22,9 +23,10 @@ int main(int argc, char **argv, char **env) {
         exit(EXIT_FAILURE);
     }
     close(STDIN_FILENO);
-    // close(STDOUT_FILENO);
+    close(STDOUT_FILENO);
 
-    struct sigaction act = {};
+    struct sigaction act;
+    memset(&act, 0, sizeof(act));
 
     act.sa_handler = SIG_IGN;
     sigaction(SIGINT, &act, NULL);

@@ -1,10 +1,9 @@
-#define _GNU_SOURCE
+#include <bits/types/siginfo_t.h>
 #include <linux/elf.h>
 #include <signal.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/ptrace.h>
 #include <sys/types.h>
 #include <sys/uio.h>
@@ -12,15 +11,6 @@
 #include <unistd.h>
 
 #include "ft_strace.h"
-
-static void signal_exit(int status) {
-    if (WCOREDUMP(status))
-        fprintf(stderr, "Quit (core dumped)\n");
-    else
-        fprintf(stderr, "+++ killed by SIG%s +++\n",
-                sigabbrev_np(WTERMSIG(status)));
-    exit(status | 0x80);
-}
 
 int trace_loop(pid_t child) {
     int                       status;
@@ -78,8 +68,11 @@ int trace_loop(pid_t child) {
             }
             in_syscall = !in_syscall;
         } else if (WIFSTOPPED(status)) {
+            siginfo_t signal;
+
             syscall_signal = WSTOPSIG(status);
-            // TODO: print signal info
+            ptrace(PTRACE_GETSIGINFO, child, NULL, &signal);
+            print_signal(signal, WTERMSIG(status));
         }
     }
     if (in_syscall) {
