@@ -72,7 +72,7 @@ int trace_loop(pid_t child) {
 
             syscall_signal = WSTOPSIG(status);
             ptrace(PTRACE_GETSIGINFO, child, NULL, &signal);
-            print_signal(signal, WTERMSIG(status));
+            print_signal(signal);
         }
     }
     if (in_syscall) {

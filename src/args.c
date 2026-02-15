@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "ft_strace.h"
 
@@ -10,8 +12,39 @@ static void print_usage() {
         "Usage: ft_strace    PROG [ARGS]\n   or: ft_strace -c PROG [ARGS]\n");
 }
 
-// TODO: implement path resolution
-static char *resolve_path(char *command) { return command; }
+static char *resolve_path(char *command) {
+    // check if command is a route
+    if (strchr(command, '/'))
+        return command;
+    char *path = getenv("PATH");
+    if (path == NULL)
+        return NULL;
+
+    int command_len = strlen(command);
+    int dir_len;
+    for (char *current_dir = path; *current_dir != '\0';) {
+
+        dir_len            = strcspn(current_dir, ":");
+        char *command_path = calloc(command_len + dir_len + 2, sizeof(char));
+        if (command_path == NULL) {
+            perror("malloc");
+            exit(EXIT_FAILURE);
+        }
+
+        memmove(command_path, current_dir, dir_len);
+        command_path[dir_len] = '/';
+        strcat(command_path, command);
+        struct stat stats;
+        if (stat(command_path, &stats) == 0)
+            return command_path;
+
+        free(command_path);
+        current_dir += dir_len;
+        if (*current_dir != '\0')
+            ++current_dir;
+    }
+    return command;
+}
 
 void verify_args(args_t *args, int argc, char **argv, char **env) {
     size_t current_arg = 1;
@@ -32,7 +65,12 @@ void verify_args(args_t *args, int argc, char **argv, char **env) {
         exit(EXIT_FAILURE);
     }
 
-    args->program_path = resolve_path(argv[current_arg]);
-    args->args         = &argv[current_arg];
-    args->env          = env;
+    if ((args->program_path = resolve_path(argv[current_arg])) == NULL) {
+        fprintf(stderr, "ft_strace: executable '%s' not found.\n\n",
+                argv[current_arg]);
+        print_usage();
+        exit(EXIT_FAILURE);
+    }
+    args->args = &argv[current_arg];
+    args->env  = env;
 }
