@@ -3,7 +3,7 @@
 
 #include <signal.h>  // pid_t
 #include <stdbool.h> // bool
-#include <stdint.h>  // uint32_t
+#include <stdint.h>  // uint
 
 #define check(function, msg)                                                   \
     if (function != 0) {                                                       \
@@ -26,53 +26,53 @@ typedef struct syscall_s {
 /* structs from sys/user.h */
 
 struct user_regs_struct64 {
-    uint64_t r15;
-    uint64_t r14;
-    uint64_t r13;
-    uint64_t r12;
-    uint64_t rbp;
-    uint64_t rbx;
-    uint64_t r11;
-    uint64_t r10;
-    uint64_t r9;
-    uint64_t r8;
-    uint64_t rax;
-    uint64_t rcx;
-    uint64_t rdx;
-    uint64_t rsi;
-    uint64_t rdi;
-    uint64_t orig_rax;
-    uint64_t rip;
-    uint64_t cs;
-    uint64_t eflags;
-    uint64_t rsp;
-    uint64_t ss;
-    uint64_t fs_base;
-    uint64_t gs_base;
-    uint64_t ds;
-    uint64_t es;
-    uint64_t fs;
-    uint64_t gs;
+    unsigned long long int r15;
+    unsigned long long int r14;
+    unsigned long long int r13;
+    unsigned long long int r12;
+    unsigned long long int rbp;
+    unsigned long long int rbx;
+    unsigned long long int r11;
+    unsigned long long int r10;
+    unsigned long long int r9;
+    unsigned long long int r8;
+    unsigned long long int rax;
+    unsigned long long int rcx;
+    unsigned long long int rdx;
+    unsigned long long int rsi;
+    unsigned long long int rdi;
+    unsigned long long int orig_rax;
+    unsigned long long int rip;
+    unsigned long long int cs;
+    unsigned long long int eflags;
+    unsigned long long int rsp;
+    unsigned long long int ss;
+    unsigned long long int fs_base;
+    unsigned long long int gs_base;
+    unsigned long long int ds;
+    unsigned long long int es;
+    unsigned long long int fs;
+    unsigned long long int gs;
 };
 
 struct user_regs_struct32 {
-    int32_t ebx;
-    int32_t ecx;
-    int32_t edx;
-    int32_t esi;
-    int32_t edi;
-    int32_t ebp;
-    int32_t eax;
-    int32_t xds;
-    int32_t xes;
-    int32_t xfs;
-    int32_t xgs;
-    int32_t orig_eax;
-    int32_t eip;
-    int32_t xcs;
-    int32_t eflags;
-    int32_t esp;
-    int32_t xss;
+    int ebx;
+    int ecx;
+    int edx;
+    int esi;
+    int edi;
+    int ebp;
+    int eax;
+    int xds;
+    int xes;
+    int xfs;
+    int xgs;
+    int orig_eax;
+    int eip;
+    int xcs;
+    int eflags;
+    int esp;
+    int xss;
 };
 
 /* args.c */

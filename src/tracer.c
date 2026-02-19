@@ -9,6 +9,8 @@
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#define __USE_GNU
+#include <string.h>
 
 #include "ft_strace.h"
 
@@ -46,24 +48,31 @@ int trace_loop(pid_t child) {
             } else if (!in_syscall) {
                 print_syscall32((struct user_regs_struct32 *)&regs);
             } else if (iov.iov_len == sizeof(regs)) {
-                fprintf(stderr, " = %li\n", regs.rax);
+                long long unsigned int syscall_return = regs.rax;
+
+                if ((long long)syscall_return < 0)
+                    fprintf(stderr, " = -1 %s (%s)\n",
+                            strerrorname_np((int)-syscall_return),
+                            strerror((int)-syscall_return));
+                else
+                    fprintf(stderr, " = %lli\n", syscall_return);
                 if (first_execve) {
                     first_execve = false;
-                    if ((long long)regs.rax < 0) {
-                        in_syscall = false;
+                    if ((long long)syscall_return < 0)
                         return EXIT_FAILURE;
-                        break;
-                    }
                 }
             } else {
-                fprintf(stderr, " = %i\n",
-                        ((struct user_regs_struct32 *)&regs)->eax);
+                int syscall_return = ((struct user_regs_struct32 *)&regs)->eax;
+                if ((unsigned int)syscall_return > 0xfffff000)
+                    fprintf(stderr, " = -1 %s (%s)\n",
+                            strerrorname_np((int)-syscall_return),
+                            strerror((int)-syscall_return));
+                else
+                    fprintf(stderr, " = %u\n", syscall_return);
                 if (first_execve) {
                     first_execve = false;
-                    if (((struct user_regs_struct32 *)&regs)->eax < 0) {
-                        in_syscall = false;
+                    if ((long long)syscall_return < 0)
                         return EXIT_FAILURE;
-                    }
                 }
             }
             in_syscall = !in_syscall;

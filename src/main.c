@@ -24,7 +24,6 @@ int main(int argc, char **argv, char **env) {
     }
     close(STDIN_FILENO);
     close(STDOUT_FILENO);
-    free(args.program_path);
 
     struct sigaction act;
     memset(&act, 0, sizeof(act));

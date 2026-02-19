@@ -820,26 +820,26 @@ void print_syscall64(struct user_regs_struct64 *regs) {
         fprintf(stderr, "%s()", name);
         break;
     case 1:
-        fprintf(stderr, "%s(%li)", name, regs->rdi);
+        fprintf(stderr, "%s(%lli)", name, regs->rdi);
         break;
     case 2:
-        fprintf(stderr, "%s(%li, %li)", name, regs->rdi, regs->rsi);
+        fprintf(stderr, "%s(%lli, %lli)", name, regs->rdi, regs->rsi);
         break;
     case 3:
-        fprintf(stderr, "%s(%li, %li, %li)", name, regs->rdi, regs->rsi,
+        fprintf(stderr, "%s(%lli, %lli, %lli)", name, regs->rdi, regs->rsi,
                 regs->rdx);
         break;
     case 4:
-        fprintf(stderr, "%s(%li, %li, %li, %li)", name, regs->rdi, regs->rsi,
-                regs->rdx, regs->r10);
+        fprintf(stderr, "%s(%lli, %lli, %lli, %lli)", name, regs->rdi,
+                regs->rsi, regs->rdx, regs->r10);
         break;
     case 5:
-        fprintf(stderr, "%s(%li, %li, %li, %li, %li)", name, regs->rdi,
+        fprintf(stderr, "%s(%lli, %lli, %lli, %lli, %lli)", name, regs->rdi,
                 regs->rsi, regs->rdx, regs->r10, regs->r8);
         break;
     case 6:
-        fprintf(stderr, "%s(%li, %li, %li, %li, %li, %li)", name, regs->rdi,
-                regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9);
+        fprintf(stderr, "%s(%lli, %lli, %lli, %lli, %lli, %lli)", name,
+                regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9);
         break;
     default:
         fprintf(stderr, "%s(?)", name);
