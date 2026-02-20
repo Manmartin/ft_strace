@@ -43,7 +43,7 @@ static char *resolve_path(char *command) {
         if (*current_dir != '\0')
             ++current_dir;
     }
-    return command;
+    return NULL;
 }
 
 void verify_args(args_t *args, int argc, char **argv, char **env) {
@@ -66,9 +66,8 @@ void verify_args(args_t *args, int argc, char **argv, char **env) {
     }
 
     if ((args->program_path = resolve_path(argv[current_arg])) == NULL) {
-        fprintf(stderr, "ft_strace: executable '%s' not found.\n\n",
+        fprintf(stderr, "ft_strace: executable '%s' not found.\n",
                 argv[current_arg]);
-        print_usage();
         exit(EXIT_FAILURE);
     }
     args->args = &argv[current_arg];
