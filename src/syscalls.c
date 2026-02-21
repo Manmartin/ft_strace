@@ -1,6 +1,8 @@
 #include <bits/types/struct_iovec.h>
 #include <stdint.h>
 #include <stdio.h>
+#define __USE_GNU
+#include <string.h>
 
 #include "ft_strace.h"
 
@@ -810,7 +812,7 @@ syscall_t syscall_table32[] = {
     [469] = {"file_setattr", 5},
 };
 
-void print_syscall64(struct user_regs_struct64 *regs) {
+static void print_syscall64(struct user_regs_struct64 *regs) {
     uint64_t    syscall_number = regs->orig_rax;
     uint32_t    argc           = syscall_table64[syscall_number].argc;
     const char *name           = syscall_table64[syscall_number].name;
@@ -846,7 +848,7 @@ void print_syscall64(struct user_regs_struct64 *regs) {
     }
 }
 
-void print_syscall32(struct user_regs_struct32 *regs) {
+static void print_syscall32(struct user_regs_struct32 *regs) {
     uint32_t    syscall_number = regs->orig_eax;
     uint32_t    argc           = syscall_table32[syscall_number].argc;
     const char *name           = syscall_table32[syscall_number].name;
@@ -880,4 +882,46 @@ void print_syscall32(struct user_regs_struct32 *regs) {
     default:
         fprintf(stderr, "%s(?)", name);
     }
+}
+
+void print_syscall_input(struct iovec *iov) {
+    if (iov->iov_len == sizeof(struct user_regs_struct64))
+        print_syscall64(iov->iov_base);
+    else
+        print_syscall32(iov->iov_base);
+}
+
+bool print_syscall_output(struct iovec *iov) {
+    // 64 bits mode
+    if (iov->iov_len == sizeof(struct user_regs_struct64)) {
+        unsigned long long int syscall_return =
+            ((struct user_regs_struct64 *)iov->iov_base)->rax;
+
+        // If syscall return an error
+        if ((long long int)syscall_return < 0) {
+            char const *error_name = strerrorname_np((int)-syscall_return);
+
+            fprintf(stderr, " = -1 %s (%s)\n",
+                    error_name != NULL ? error_name : "UNKNOWN",
+                    strerror((int)-syscall_return));
+            return SYSCALL_ERROR;
+        } else
+            fprintf(stderr, " = %lli\n", syscall_return);
+    }
+    // 32 bits mode
+    else {
+        int syscall_return = ((struct user_regs_struct32 *)iov->iov_base)->eax;
+
+        // If syscall return an error
+        if ((unsigned int)syscall_return > 0xfffff000) {
+            char const *error_name = strerrorname_np((int)-syscall_return);
+
+            fprintf(stderr, " = -1 %s (%s)\n",
+                    error_name != NULL ? error_name : "UNKNOWN",
+                    strerror((int)-syscall_return));
+            return SYSCALL_ERROR;
+        } else
+            fprintf(stderr, " = %u\n", syscall_return);
+    }
+    return SYSCALL_SUCCESS;
 }

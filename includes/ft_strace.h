@@ -1,9 +1,13 @@
 #ifndef FT_STRACE
 #define FT_STRACE
 
+#include <bits/types/struct_iovec.h>
 #include <signal.h>  // pid_t
 #include <stdbool.h> // bool
 #include <stdint.h>  // uint
+
+#define SYSCALL_SUCCESS true
+#define SYSCALL_ERROR false
 
 #define check(function, msg)                                                   \
     if (function != 0) {                                                       \
@@ -17,6 +21,10 @@ typedef struct args_s {
     char **env;
     bool   timer_mode;
 } args_t;
+
+typedef struct syscall_timer_s {
+    uint64_t useconds;
+} syscall_timer;
 
 typedef struct syscall_s {
     const char *name;
@@ -83,8 +91,8 @@ void signal_exit(int status);
 void print_signal(siginfo_t signal);
 
 /* syscall.c */
-void print_syscall64(struct user_regs_struct64 *regs);
-void print_syscall32(struct user_regs_struct32 *regs);
+void print_syscall_input(struct iovec *iov);
+bool print_syscall_output(struct iovec *iov);
 
 /* tracer.c */
 int trace_loop(pid_t child);

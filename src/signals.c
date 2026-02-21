@@ -40,8 +40,6 @@ void signal_exit(int status) {
     else
         fprintf(stderr, "+++ killed by SIG%s +++\n",
                 sigabbrev_np(WTERMSIG(status)));
-    kill(getpid(), WTERMSIG(status));
-    exit(status | 0x80);
 }
 
 void print_signal(siginfo_t signal) {

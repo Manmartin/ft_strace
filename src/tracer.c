@@ -9,8 +9,6 @@
 #include <sys/uio.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#define __USE_GNU
-#include <string.h>
 
 #include "ft_strace.h"
 
@@ -19,7 +17,8 @@ int trace_loop(pid_t child) {
     struct user_regs_struct64 regs;
     struct iovec              iov;
 
-    check((ptrace(PTRACE_SEIZE, child, NULL, PTRACE_O_TRACESYSGOOD) == -1),
+    check((ptrace(PTRACE_SEIZE, child, NULL,
+                  PTRACE_O_TRACESYSGOOD | PTRACE_O_EXITKILL) == -1),
           "PTRACE_SEIZE");
     waitpid(child, &status, 0);
     if (WIFSIGNALED(status))
@@ -37,42 +36,26 @@ int trace_loop(pid_t child) {
         waitpid(child, &status, 0);
         syscall_signal = 0;
 
-        if (WIFSIGNALED(status))
+        if (WIFSIGNALED(status)) {
             signal_exit(status);
+            return status | 0x80;
+        }
 
         if (WIFSTOPPED(status) && (status >> 8) == (SIGTRAP | 0x80)) {
             check(ptrace(PTRACE_GETREGSET, child, NT_PRSTATUS, &iov),
                   "PTRACE_GETREGSET");
-            if (!in_syscall && iov.iov_len == sizeof(regs)) {
-                print_syscall64(&regs);
-            } else if (!in_syscall) {
-                print_syscall32((struct user_regs_struct32 *)&regs);
-            } else if (iov.iov_len == sizeof(regs)) {
-                long long unsigned int syscall_return = regs.rax;
-
-                if ((long long)syscall_return < 0)
-                    fprintf(stderr, " = -1 %s (%s)\n",
-                            strerrorname_np((int)-syscall_return),
-                            strerror((int)-syscall_return));
-                else
-                    fprintf(stderr, " = %lli\n", syscall_return);
-                if (first_execve) {
-                    first_execve = false;
-                    if ((long long)syscall_return < 0)
-                        return EXIT_FAILURE;
-                }
+            if (!in_syscall) {
+                print_syscall_input(&iov);
             } else {
-                int syscall_return = ((struct user_regs_struct32 *)&regs)->eax;
-                if ((unsigned int)syscall_return > 0xfffff000)
-                    fprintf(stderr, " = -1 %s (%s)\n",
-                            strerrorname_np((int)-syscall_return),
-                            strerror((int)-syscall_return));
-                else
-                    fprintf(stderr, " = %u\n", syscall_return);
+                bool status = print_syscall_output(&iov);
                 if (first_execve) {
-                    first_execve = false;
-                    if ((long long)syscall_return < 0)
+                    if (status == SYSCALL_ERROR)
                         return EXIT_FAILURE;
+                    if (iov.iov_len == sizeof(struct user_regs_struct32))
+                        fprintf(stderr,
+                                "[ Process PID=%i runs in 32 bit mode. ]\n",
+                                child);
+                    first_execve = false;
                 }
             }
             in_syscall = !in_syscall;
