@@ -26,6 +26,12 @@ typedef struct syscall_timer_s {
     uint64_t useconds;
 } syscall_timer;
 
+typedef struct timer_array_s {
+    uint64_t       capacity;
+    uint64_t       size;
+    syscall_timer *timers;
+} timer_array;
+
 typedef struct syscall_s {
     const char *name;
     uint32_t    argc;
@@ -93,6 +99,9 @@ void print_signal(siginfo_t signal);
 /* syscall.c */
 void print_syscall_input(struct iovec *iov);
 bool print_syscall_output(struct iovec *iov);
+
+/* timer.c */
+int timer_loop(pid_t child);
 
 /* tracer.c */
 int trace_loop(pid_t child);

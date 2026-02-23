@@ -1,5 +1,3 @@
-#include <bits/types/struct_iovec.h>
-#include <stdint.h>
 #include <stdio.h>
 #define __USE_GNU
 #include <string.h>

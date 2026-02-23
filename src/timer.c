@@ -10,6 +10,10 @@
 
 #include "ft_strace.h"
 
+void print_array(timer_array timers) {
+    fprintf(stderr, const char *restrict, ...)
+}
+
 int timer_loop(pid_t child) {
     int                       status;
     struct user_regs_struct64 regs;

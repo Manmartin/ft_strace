@@ -1,9 +1,6 @@
 #include <bits/types/siginfo_t.h>
-#include <signal.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <sys/wait.h>
-#include <unistd.h>
 #define __USE_GNU // sigabbrev_np
 #include <string.h>
 

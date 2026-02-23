@@ -1,14 +1,8 @@
-#include <bits/types/siginfo_t.h>
 #include <linux/elf.h>
-#include <signal.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ptrace.h>
-#include <sys/types.h>
-#include <sys/uio.h>
 #include <sys/wait.h>
-#include <unistd.h>
 
 #include "ft_strace.h"
 
@@ -28,6 +22,7 @@ int trace_loop(pid_t child) {
     iov.iov_len  = sizeof(regs);
 
     bool in_syscall     = false;
+    bool log_syscall    = true;
     bool first_execve   = true;
     int  syscall_signal = 0;
     while (!WIFEXITED(status)) {
@@ -45,13 +40,16 @@ int trace_loop(pid_t child) {
             check(ptrace(PTRACE_GETREGSET, child, NT_PRSTATUS, &iov),
                   "PTRACE_GETREGSET");
             if (!in_syscall) {
-                print_syscall_input(&iov);
+                if (log_syscall)
+                    print_syscall_input(&iov);
             } else {
-                bool status = print_syscall_output(&iov);
+                bool status = SYSCALL_SUCCESS;
+                if (log_syscall)
+                    status = print_syscall_output(&iov);
                 if (first_execve) {
                     if (status == SYSCALL_ERROR)
-                        return EXIT_FAILURE;
-                    if (iov.iov_len == sizeof(struct user_regs_struct32))
+                        log_syscall = false;
+                    else if (iov.iov_len == sizeof(struct user_regs_struct32))
                         fprintf(stderr,
                                 "[ Process PID=%i runs in 32 bit mode. ]\n",
                                 child);
@@ -67,7 +65,7 @@ int trace_loop(pid_t child) {
             print_signal(signal);
         }
     }
-    if (in_syscall) {
+    if (in_syscall && log_syscall) {
         fprintf(stderr, " = ?\n");
     }
     fprintf(stderr, "+++ exited with %i +++\n", WEXITSTATUS(status));

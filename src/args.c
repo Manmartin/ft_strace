@@ -6,7 +6,7 @@
 
 #include "ft_strace.h"
 
-static void print_usage() {
+static void print_usage(void) {
     fprintf(
         stderr,
         "Usage: ft_strace    PROG [ARGS]\n   or: ft_strace -c PROG [ARGS]\n");

@@ -17,6 +17,7 @@ SRCS :=	src/args.c 		\
     	src/main.c 		\
      	src/signals.c 	\
      	src/syscalls.c 	\
+      	src/timer.c		\
       	src/tracer.c
 OBJS := $(SRCS:%.c=$(BUILD_DIR)/%.o)
 

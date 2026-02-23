@@ -19,7 +19,6 @@ int main(int argc, char **argv, char **env) {
         kill(getpid(), SIGSTOP);
         execve(args.program_path, args.args, args.env);
         perror("ft_strace: execve");
-        fprintf(stderr, "+++ exited with %i +++\n", EXIT_FAILURE);
         exit(EXIT_FAILURE);
     }
     close(STDIN_FILENO);
@@ -32,5 +31,8 @@ int main(int argc, char **argv, char **env) {
     sigaction(SIGINT, &act, NULL);
     sigaction(SIGQUIT, &act, NULL);
     sigaction(SIGTSTP, &act, NULL);
+
+    if (args.timer_mode)
+        return timer_loop(pid);
     return trace_loop(pid);
 }
