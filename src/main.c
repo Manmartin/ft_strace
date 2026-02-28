@@ -32,7 +32,15 @@ int main(int argc, char **argv, char **env) {
     sigaction(SIGQUIT, &act, NULL);
     sigaction(SIGTSTP, &act, NULL);
 
-    if (args.timer_mode)
-        return timer_loop(pid);
-    return trace_loop(pid);
+    int         return_value;
+    timer_array syscalls;
+
+    if (args.timer_mode) {
+        return_value = timer_loop(pid, &syscalls);
+        print_array(syscalls);
+        free(syscalls.timers);
+    } else
+        return_value = trace_loop(pid);
+    free(args.program_path);
+    return return_value;
 }

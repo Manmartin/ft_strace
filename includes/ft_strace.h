@@ -23,7 +23,11 @@ typedef struct args_s {
 } args_t;
 
 typedef struct syscall_timer_s {
+    int      identifier;
+    bool     is32bits;
     uint64_t useconds;
+    uint64_t calls;
+    uint64_t errors;
 } syscall_timer;
 
 typedef struct timer_array_s {
@@ -97,11 +101,14 @@ void signal_exit(int status);
 void print_signal(siginfo_t signal);
 
 /* syscall.c */
-void print_syscall_input(struct iovec *iov);
-bool print_syscall_output(struct iovec *iov);
+syscall_t get_syscall_data64(int identifier);
+syscall_t get_syscall_data32(int identifier);
+void      print_syscall_input(struct iovec *iov);
+bool      print_syscall_output(struct iovec *iov);
 
 /* timer.c */
-int timer_loop(pid_t child);
+int  timer_loop(pid_t child, timer_array *syscalls);
+void print_array(timer_array array);
 
 /* tracer.c */
 int trace_loop(pid_t child);
