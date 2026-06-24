@@ -30,7 +30,6 @@ int main(int argc, char **argv, char **env) {
     act.sa_handler = SIG_IGN;
     sigaction(SIGINT, &act, NULL);
     sigaction(SIGQUIT, &act, NULL);
-    sigaction(SIGTSTP, &act, NULL);
 
     int         return_value;
     timer_array syscalls;

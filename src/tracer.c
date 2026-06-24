@@ -14,7 +14,20 @@ int trace_loop(pid_t child) {
     check((ptrace(PTRACE_SEIZE, child, NULL,
                   PTRACE_O_TRACESYSGOOD | PTRACE_O_EXITKILL) == -1),
           "PTRACE_SEIZE");
+
+    sigset_t empty;
+    sigset_t blocked;
+
+    sigemptyset(&empty);
+    sigaddset(&blocked, SIGHUP);
+    sigaddset(&blocked, SIGQUIT);
+    sigaddset(&blocked, SIGPIPE);
+    sigaddset(&blocked, SIGTERM);
+
+    sigprocmask(SIG_SETMASK, &empty, NULL);
     waitpid(child, &status, 0);
+    sigprocmask(SIG_BLOCK, &blocked, NULL);
+
     if (WIFSIGNALED(status))
         signal_exit(status);
 
@@ -28,7 +41,9 @@ int trace_loop(pid_t child) {
     while (!WIFEXITED(status)) {
         check(ptrace(PTRACE_SYSCALL, child, NULL, syscall_signal),
               "PTRACE_SYSCALL");
+        sigprocmask(SIG_SETMASK, &empty, NULL);
         waitpid(child, &status, 0);
+        sigprocmask(SIG_BLOCK, &blocked, NULL);
         syscall_signal = 0;
 
         if (WIFSIGNALED(status)) {
