@@ -15,9 +15,9 @@ static void print_usage(void) {
 static char *resolve_path(char *command) {
     // check if command is a route
     if (strchr(command, '/')) {
-	    char *path = strdup(command);
-	    if (path == NULL)
-	        return NULL;
+        char *path = strdup(command);
+        if (path == NULL)
+            return NULL;
         struct stat stats;
         if (stat(path, &stats) != 0) {
             free(path);
