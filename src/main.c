@@ -6,6 +6,13 @@
 
 #include "ft_strace.h"
 
+volatile sig_atomic_t interrupted = 0;
+
+static void sig_handler(int sig) {
+    (void)sig;
+    interrupted = 1;
+}
+
 int main(int argc, char **argv, char **env) {
     args_t args;
     verify_args(&args, argc, argv, env);
@@ -25,11 +32,15 @@ int main(int argc, char **argv, char **env) {
     close(STDOUT_FILENO);
 
     struct sigaction act;
-    memset(&act, 0, sizeof(act));
+    sigemptyset(&act.sa_mask);
+    act.sa_handler = sig_handler;
+    act.sa_flags   = 0;
 
-    act.sa_handler = SIG_IGN;
-    sigaction(SIGINT, &act, NULL);
+    sigaction(SIGHUP, &act, NULL);
     sigaction(SIGQUIT, &act, NULL);
+    sigaction(SIGINT, &act, NULL);
+    sigaction(SIGPIPE, &act, NULL);
+    sigaction(SIGTERM, &act, NULL);
 
     int         return_value;
     timer_array syscalls;

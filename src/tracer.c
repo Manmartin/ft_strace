@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <linux/elf.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,6 +6,38 @@
 #include <sys/wait.h>
 
 #include "ft_strace.h"
+
+void set_signals_empty(void) {
+    sigset_t empty;
+
+    sigemptyset(&empty);
+    check(sigprocmask(SIG_SETMASK, &empty, NULL), "SIGPROCMASK");
+}
+
+void set_signals_blocked(void) {
+    sigset_t blocked;
+
+    sigaddset(&blocked, SIGHUP);
+    sigaddset(&blocked, SIGQUIT);
+    sigaddset(&blocked, SIGINT);
+    sigaddset(&blocked, SIGPIPE);
+    sigaddset(&blocked, SIGTERM);
+    check(sigprocmask(SIG_BLOCK, &blocked, NULL), "SIGPROCMASK");
+}
+
+static void wait_child(pid_t child, int *status) {
+    set_signals_empty();
+    if (waitpid(child, status, 0) == -1) {
+        if (interrupted == 1) {
+            fprintf(stderr, "strace: Process %i detached\n", child);
+            exit(EXIT_FAILURE);
+        } else {
+            perror("WAITPID");
+            exit(EXIT_FAILURE);
+        }
+    }
+    set_signals_blocked();
+}
 
 int trace_loop(pid_t child) {
     int                       status;
@@ -15,18 +48,7 @@ int trace_loop(pid_t child) {
                   PTRACE_O_TRACESYSGOOD | PTRACE_O_EXITKILL) == -1),
           "PTRACE_SEIZE");
 
-    sigset_t empty;
-    sigset_t blocked;
-
-    sigemptyset(&empty);
-    sigaddset(&blocked, SIGHUP);
-    sigaddset(&blocked, SIGQUIT);
-    sigaddset(&blocked, SIGPIPE);
-    sigaddset(&blocked, SIGTERM);
-
-    sigprocmask(SIG_SETMASK, &empty, NULL);
-    waitpid(child, &status, 0);
-    sigprocmask(SIG_BLOCK, &blocked, NULL);
+    wait_child(child, &status);
 
     if (WIFSIGNALED(status))
         signal_exit(status);
@@ -41,9 +63,7 @@ int trace_loop(pid_t child) {
     while (!WIFEXITED(status)) {
         check(ptrace(PTRACE_SYSCALL, child, NULL, syscall_signal),
               "PTRACE_SYSCALL");
-        sigprocmask(SIG_SETMASK, &empty, NULL);
-        waitpid(child, &status, 0);
-        sigprocmask(SIG_BLOCK, &blocked, NULL);
+        wait_child(child, &status);
         syscall_signal = 0;
 
         if (WIFSIGNALED(status)) {

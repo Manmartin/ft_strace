@@ -93,6 +93,8 @@ struct user_regs_struct32 {
     int xss;
 };
 
+extern volatile sig_atomic_t interrupted;
+
 /* args.c */
 void verify_args(args_t *args, int argc, char **argv, char **env);
 
